@@ -24,11 +24,11 @@ class Bird(Turtle):
         self.backward(10)
 
     def fly(self):
-        self.forward(30)
+        self.forward(35)
 
-# (350, -400) GIT
-wall_positions_y = [(300, -450),(350, -400)]
-#, (500, -300) ,
+
+wall_positions_y = [(300, -450), (350, -400), (500, -300)]
+
 
 class Wall:
     def __init__(self):
@@ -57,16 +57,37 @@ class Wall:
 
     def walls(self):
         random_wall = random.choice(wall_positions_y)
-        self.create_walls(random_wall[0],random_wall[1])
+        self.create_walls(random_wall[0], random_wall[1])
 
-    def delete_wall(self,wal):
+    def delete_wall(self, wal):
         self.wall_list.remove(wal)
 
 
+class Score(Turtle):
+    def __init__(self):
+        super().__init__()
+        self.penup()
+        self.score = 0
+        self.hideturtle()
+        self.goto(0, 260)
+        self.update_score()
 
+    def update_score(self):
+        self.clear()
+        self.write(f"Score: {self.score}", align="center", font=('Arial', 24, 'normal'))
+
+    def score_up(self):
+        self.score += 1
+        self.update_score()
+
+    def game_over(self):
+        self.goto(0,0)
+        self.write("GAME OVER", align="center", font=('Arial', 24, 'normal'))
+
+
+score = Score()
 bird = Bird()
 screen.onkeypress(bird.fly, "Up")
-
 wall = Wall()
 wall.walls()
 
@@ -76,13 +97,23 @@ while game:
     bird.falling()
     wall.wall_move()
     # create wall
-
     for walls in wall.wall_list:
         if walls[0].xcor() == 0 or walls[1].xcor() == 0:
             wall.walls()
     # delete wall
-
     for walls in wall.wall_list:
         if walls[0].xcor() == -400 or walls[1].xcor() == -400:
             wall.delete_wall(walls)
+
+    # point add
+    for walls in wall.wall_list:
+        if walls[0].xcor() == bird.xcor():
+            score.score_up()
+
+    # collision
+    for walls in wall.wall_list:
+        if walls[0].ycor() > bird.ycor() + 450 and walls[0].xcor() == bird.xcor() \
+                or walls[1].ycor() < bird.ycor() - 450 and walls[0].xcor() == bird.xcor():
+            score.game_over()
+            game = False
 screen.exitonclick()
